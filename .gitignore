@@ -1,0 +1,12 @@
+# Documento Word: se mantiene solo en local
+*.docx
+~$*
+
+# Material del instructor (no se publica)
+Proyecto_AI-901_Rio_Claro*.pdf
+
+# Python / entorno
+__pycache__/
+*.pyc
+.venv/
+.env

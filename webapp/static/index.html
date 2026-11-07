@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Río Claro · Asistente IA</title>
+<style>
+  :root {
+    --bg:#f4efe8; --bg2:#ebe3d8; --card:#fffdf9; --ink:#1d1b19; --muted:#7b7166;
+    --gold:#b08a4a; --gold-soft:#f1e6d1; --line:#e4d9c9; --dark:#1b1a19; --warn:#fbf0d6; --bad:#fde4e0;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font-family:var(--sans); color:var(--ink);
+         background:linear-gradient(180deg,var(--bg) 0%, var(--bg2) 100%); min-height:100dvh; }
+  .wrap { max-width:1060px; margin:0 auto; padding:0 20px; }
+
+  /* barra superior */
+  nav { display:flex; align-items:center; justify-content:space-between; padding:18px 0; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.12em; font-size:.8rem; }
+  .brand .logo { width:34px; height:34px; border:1.5px solid var(--gold); border-radius:8px; display:grid; place-items:center; color:var(--gold); font-size:1rem; }
+  .brand small { display:block; font-weight:500; letter-spacing:.2em; color:var(--muted); font-size:.62rem; }
+  .pill { background:var(--dark); color:#fff; font-size:.7rem; letter-spacing:.12em; padding:11px 18px; border-radius:6px; text-decoration:none; font-weight:600; }
+
+  /* hero */
+  .hero { padding:34px 0 26px; max-width:640px; }
+  .eyebrow { color:var(--gold); font-size:.72rem; letter-spacing:.2em; font-weight:700; }
+  h1 { font-family:var(--serif); font-size:clamp(2rem,5.4vw,3.3rem); line-height:1.1; margin:12px 0 14px; font-weight:700; }
+  h1 em { font-style:normal; color:var(--gold); }
+  .lead { color:#4a433b; max-width:480px; line-height:1.55; margin:0 0 22px; }
+  .btn { display:inline-block; border:0; cursor:pointer; font-size:.72rem; letter-spacing:.14em; font-weight:700;
+         padding:14px 22px; border-radius:6px; text-decoration:none; font-family:var(--sans); }
+  .btn.dark { background:var(--dark); color:#fff; }
+  .btn.ghost { background:transparent; color:var(--ink); border:1px solid #cdbfa9; margin-left:8px; }
+
+  /* tarjetas de agentes */
+  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:0; background:var(--card); border:1px solid var(--line);
+           border-radius:12px; box-shadow:0 10px 30px rgba(80,55,20,.08); overflow:hidden; margin-bottom:34px; }
+  .card { text-align:left; background:transparent; border:0; border-right:1px solid var(--line); padding:18px 20px; cursor:pointer;
+          display:flex; gap:14px; align-items:flex-start; font-family:var(--sans); color:var(--ink); }
+  .card:last-child { border-right:0; }
+  .card .ic { width:38px; height:38px; flex:none; border:1.5px solid var(--gold); border-radius:9px; display:grid; place-items:center; color:var(--gold); font-size:1.1rem; }
+  .card b { display:block; font-size:.72rem; letter-spacing:.14em; margin-bottom:4px; }
+  .card span { font-size:.8rem; color:var(--muted); line-height:1.4; }
+  .card.on { background:var(--gold-soft); }
+  .card:hover { background:#f8f0e1; }
+
+  /* chat */
+  .chat { background:var(--card); border:1px solid var(--line); border-radius:14px; box-shadow:0 14px 40px rgba(80,55,20,.1);
+          display:flex; flex-direction:column; height:min(640px,78dvh); margin-bottom:40px; overflow:hidden; }
+  .chat-head { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--line); }
+  .chat-head h2 { margin:0; font-size:.8rem; letter-spacing:.16em; }
+  .chat-head a { font-size:.72rem; color:var(--gold); letter-spacing:.1em; font-weight:700; text-decoration:none; }
+  .aviso { background:var(--warn); padding:9px 18px; font-size:.8rem; border-bottom:1px solid #eadbab; color:#5b4a1d; }
+  #log { flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:12px; background:#fbf8f3; }
+  .msg { max-width:min(640px,90%); padding:11px 15px; border-radius:12px; white-space:pre-wrap; line-height:1.5; font-size:.95rem; }
+  .user { align-self:flex-end; background:var(--dark); color:#fff; border-bottom-right-radius:3px; }
+  .bot { align-self:flex-start; background:#fff; border:1px solid var(--line); border-bottom-left-radius:3px; }
+  .bot small, .user small { display:block; margin-top:8px; font-size:.72rem; color:var(--muted); }
+  .user small { color:#d9c9a5; }
+  .revision { background:var(--bad); border-color:#efb3ab; }
+  .chip { display:inline-flex; gap:6px; align-items:center; background:var(--gold-soft); color:#5b4a1d; border:1px solid #e3d0a8;
+          border-radius:999px; padding:4px 10px; font-size:.75rem; }
+  form { display:flex; gap:10px; padding:12px 14px; border-top:1px solid var(--line); align-items:center; background:var(--card); flex-wrap:wrap; }
+  form input[type=text] { flex:1; min-width:140px; padding:13px 14px; border:1px solid #d9cbb5; border-radius:8px; font-size:1rem; background:#fff; font-family:var(--sans); }
+  form input[type=text]:focus { outline:2px solid var(--gold); outline-offset:1px; }
+  .filebtn { border:1px solid #d9cbb5; background:#fff; border-radius:8px; padding:11px 13px; cursor:pointer; font-size:1.1rem; line-height:1; }
+  .filebtn:hover { background:var(--gold-soft); }
+  #pending { width:100%; }
+  #pending .chip button { border:0; background:none; cursor:pointer; color:#5b4a1d; font-size:.9rem; padding:0; }
+  footer { text-align:center; color:var(--muted); font-size:.75rem; padding:0 0 28px; }
+
+  @media (max-width:720px) {
+    .cards { grid-template-columns:1fr; }
+    .card { border-right:0; border-bottom:1px solid var(--line); }
+    .card:last-child { border-bottom:0; }
+    .pill { display:none; }
+    .btn.ghost { margin:8px 0 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="brand"><div class="logo">💧</div><div>RÍO CLARO<small>DISTRIBUIDORA</small></div></div>
+    <a class="pill" href="#chat">HABLAR CON EL ASISTENTE</a>
+  </nav>
+
+  <section class="hero">
+    <div class="eyebrow">ASISTENTE CON INTELIGENCIA ARTIFICIAL</div>
+    <h1>Respuestas claras para tu <em>operación</em></h1>
+    <p class="lead">Consulta catálogos, inventario, políticas y procedimientos en segundos. Cada respuesta cita su fuente y una persona siempre revisa lo importante.</p>
+    <a class="btn dark" href="#chat">EMPEZAR A CONSULTAR</a>
+  </section>
+
+  <section class="cards" id="tabs">
+    <button class="card on" data-agent="comercial"><div class="ic">🏷️</div><div><b>COMERCIAL</b><span>Catálogos, precios y perfiles de clientes.</span></div></button>
+    <button class="card" data-agent="operativo"><div class="ic">📦</div><div><b>OPERATIVO</b><span>Inventario, recepción, entregas y procedimientos.</span></div></button>
+    <button class="card" data-agent="rh"><div class="ic">🤝</div><div><b>RH Y ATENCIÓN</b><span>Políticas, devoluciones, vacaciones y quejas.</span></div></button>
+  </section>
+
+  <section class="chat" id="chat">
+    <div class="chat-head"><h2 id="agentName">AGENTE COMERCIAL</h2><a href="#" id="reset">NUEVA CONVERSACIÓN</a></div>
+    <div class="aviso">🤖 Estás hablando con una <b>inteligencia artificial</b>. Puede equivocarse: una persona debe revisar los montos y aprobar los pagos.</div>
+    <div id="log"></div>
+    <form id="form">
+      <input type="text" id="msg" placeholder="Escribe tu pregunta…" autocomplete="off">
+      <button class="btn dark" type="submit">ENVIAR</button>
+    </form>
+  </section>
+  <footer>Prototipo de Distribuidora Río Claro · Microsoft Foundry y Azure</footer>
+</div>
+
+<script>
+const log = document.getElementById('log');
+const form = document.getElementById('form');
+const msg = document.getElementById('msg');
+let agent = 'comercial';
+const prev = {};            // previous_response_id por agente (mantiene la conversación)
+
+const nombres = { comercial:'AGENTE COMERCIAL', operativo:'AGENTE OPERATIVO', rh:'AGENTE RH Y ATENCIÓN' };
+const saludo = {
+  comercial: 'Hola, soy el agente Comercial. Pregúntame por catálogos, precios y perfiles de clientes.',
+  operativo: 'Hola, soy el agente Operativo. Pregúntame por inventario, recepción, entregas y procedimientos.',
+  rh: 'Hola, soy el agente de RH y Atención a clientes. Pregúntame por políticas, devoluciones o vacaciones.'
+};
+
+function kb(n){ return n > 1048576 ? (n/1048576).toFixed(1)+' MB' : Math.max(1,Math.round(n/1024))+' KB'; }
+
+function add(text, cls, extra) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.textContent = text;
+  if (extra) { const s = document.createElement('small'); s.textContent = extra; d.appendChild(s); }
+  log.appendChild(d); log.scrollTop = log.scrollHeight;
+  return d;
+}
+
+function setAgent(a, keep) {
+  agent = a;
+  document.querySelectorAll('.card').forEach(b => b.classList.toggle('on', b.dataset.agent === a));
+  document.getElementById('agentName').textContent = nombres[a];
+  log.innerHTML = '';
+  add(saludo[a], 'bot', 'Respuestas generadas por IA a partir de los documentos de la empresa.');
+}
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('.card'); if (b) setAgent(b.dataset.agent);
+});
+document.getElementById('reset').addEventListener('click', e => { e.preventDefault(); delete prev[agent]; setAgent(agent); });
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = msg.value.trim();
+  if (!text) return;
+  add(text, 'user');
+  msg.value = '';
+  const wait = add('Pensando…', 'bot');
+
+  const fd = new FormData();
+  fd.append('agent', agent);
+  fd.append('message', text);
+  if (prev[agent]) fd.append('previous_response_id', prev[agent]);
+
+  try {
+    const r = await fetch('/chat', { method: 'POST', body: fd });
+    const j = await r.json();
+    wait.remove();
+    if (!r.ok) { add('Error: ' + j.error, 'bot revision'); return; }
+    prev[agent] = j.response_id;
+    const dudoso = /revisi[óo]n humana|no (pude|puedo) leer|ilegible|borros/i.test(j.answer);
+    const pie = (dudoso ? '⚠️ Requiere revisión humana. ' : '') + 'Agente: ' + j.agent + ' · Generado por IA';
+    add(j.answer, 'bot' + (dudoso ? ' revision' : ''), pie);
+  } catch (err) {
+    wait.remove(); add('Error de red: ' + err, 'bot revision');
+  }
+});
+
+setAgent('comercial');
+</script>
+</body>
+</html>
